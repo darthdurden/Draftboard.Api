@@ -63,21 +63,21 @@ namespace Draftboard.Api.Controllers
                     {
                         Season = y.Season,
                         AtBats = y.AtBats ?? 0,
-                        Homeruns = y.Homeruns.Value,
-                        NetStolenBases2 = y.NetStolenBases2.Value,
-                        OnBasePct = y.OnBasePct.Value,
-                        RunsProduced = y.RunsProduced.Value,
-                        TotalBases = y.TotalBases.Value
+                        Homeruns = y.Homeruns ?? 0,
+                        NetStolenBases2 = y.NetStolenBases2 ?? 0,
+                        OnBasePct = y.OnBasePct ?? 0,
+                        RunsProduced = y.RunsProduced ?? 0,
+                        TotalBases = y.TotalBases ?? 0
                     }),
                     PitchingStats = player.PlayerStats.Where(x => x.ERA.HasValue).Select(y => new PitchingStatsDto
                     {
                         Season = y.Season,
                         InningsPitched = y.InningsPitched ?? 0,
-                        ERA = y.ERA.Value,
-                        ReliefPitcherContribution = y.RPC.Value,
-                        StartingPitcherContribution = y.SPC.Value,
-                        Strikeouts = y.Strikeouts.Value,
-                        WHIP = y.WHIP.Value
+                        ERA = y.ERA ?? 0,
+                        ReliefPitcherContribution = y.RPC ?? 0,
+                        StartingPitcherContribution = y.SPC ?? 0,
+                        Strikeouts = y.Strikeouts ?? 0,
+                        WHIP = y.WHIP ?? 0
                     }),
                     Headshot = $"https://fantraximg.com/si/headshots/MLB/hs{player.FantraxId.Trim('*')}_400_6.png",
                     FirstName = player.Name.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)[0],

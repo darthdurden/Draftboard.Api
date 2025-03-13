@@ -1,0 +1,17 @@
+version: '3.3'
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'draftboard'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - draftboarddb:/var/lib/mysql
+# Names our volume
+volumes:
+  draftboarddb:

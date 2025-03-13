@@ -157,7 +157,7 @@ namespace Draftboard.Api.Controllers
 
         [HttpPut]
         [Route("players")]
-        public async Task<IActionResult> ImportAsync([FromBody] List<PlayerRecord> players)
+        public async Task<IActionResult> ImportAsync([FromBody] List<PlayerRecord> players, [FromQuery]bool freshImport = true)
         {
             if (!ModelState.IsValid)
             {
@@ -166,32 +166,36 @@ namespace Draftboard.Api.Controllers
 
             await _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE PlayerPositions");
             await _context.Database.ExecuteSqlRawAsync("DELETE FROM FantasyTeamPlayers");
-            //await _context.Database.ExecuteSqlRawAsync("DELETE FROM FantasyTeams");
 
-            var keptPlayers = players.Where(x => x.Status != "FA" && x.Status != "W");
+            var keptPlayers = players.Where(x => x.Status != "FA" && x.Status != "W" && !x.Status.StartsWith("W ("));
+            if (freshImport)
+            {
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM FantasyTeams");
 
-            // Add teams
-            /*await _context.AddRangeAsync(keptPlayers.Select(x => x.Status).Distinct().Select(x =>
-                new FantasyTeam 
-                {
-                    Id = x
-                }
-            ));
+                // Add teams
+                await _context.AddRangeAsync(keptPlayers.Select(x => x.Status).Distinct().Select(x =>
+                    new FantasyTeam
+                    {
+                        Id = x
+                    }
+                ));
+            }
 
-            await _context.SaveChangesAsync();*/
+            await _context.SaveChangesAsync();
 
             // Add all players
             var positionsById = _context.Positions.ToDictionary(x => x.Id);
             var playersByFantraxId = _context.Players.ToDictionary(x => x.FantraxId);
 
-            foreach (var player in players)
+            for(var i = 0; i < players.Count; i++)
             {
+                var player = players[i];
                 if (playersByFantraxId.TryGetValue(player.Id, out var existingPlayer))
                 {
                     // Update player
                     existingPlayer.Age = player.Age;
                     existingPlayer.MLBTeam = player.Team;
-                    existingPlayer.Rank = player.RkOv;
+                    existingPlayer.Rank = i;
                     existingPlayer.Name = player.Player;
                 }
                 else
@@ -201,7 +205,7 @@ namespace Draftboard.Api.Controllers
                     {
                         FantraxId = player.Id,
                         Name = player.Player,
-                        Rank = player.RkOv,
+                        Rank = i,
                         MLBTeam = player.Team,
                         Age = player.Age
                     };
